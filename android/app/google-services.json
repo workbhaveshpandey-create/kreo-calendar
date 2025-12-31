@@ -1,0 +1,39 @@
+{
+    "project_info": {
+        "project_number": "1053816818404",
+        "project_id": "kreoecosystem",
+        "storage_bucket": "kreoecosystem.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:1053816818404:android:543a9eb9c1dcb2b55cbaf1",
+                "android_client_info": {
+                    "package_name": "com.kreoecosystem.kreo_calendar"
+                }
+            },
+            "oauth_client": [
+                {
+                    "client_id": "1053816818404-pvscr6cpp7jrae16plbime5r0jjk04jg.apps.googleusercontent.com",
+                    "client_type": 3
+                }
+            ],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyBzhLPV2XNWtw9bvey9pK_WqOlhsHezFLk"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": [
+                        {
+                            "client_id": "1053816818404-pvscr6cpp7jrae16plbime5r0jjk04jg.apps.googleusercontent.com",
+                            "client_type": 3
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

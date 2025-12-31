@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="quick_schedule"
+        android:enabled="true"
+        android:icon="@drawable/ic_mic"
+        android:shortcutShortLabel="@string/shortcut_quick_schedule_short"
+        android:shortcutLongLabel="@string/shortcut_quick_schedule_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.kreoecosystem.kreo_calendar"
+            android:targetClass="com.kreoecosystem.kreo_calendar.MainActivity"
+            android:data="kreo://quick-schedule" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>
