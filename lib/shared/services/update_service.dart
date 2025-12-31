@@ -13,7 +13,7 @@ class UpdateService {
   UpdateService._internal();
 
   // GitHub repository info - UPDATE THESE WITH YOUR REPO
-  static const String _githubOwner = 'kreoecosystem';
+  static const String _githubOwner = 'workbhaveshpandey-create';
   static const String _githubRepo = 'kreo-calendar';
 
   String? _latestVersion;
@@ -115,24 +115,45 @@ class UpdateService {
 
   /// Compare two version strings (returns true if latest > current)
   bool _compareVersions(String current, String latest) {
-    final currentParts = current
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
-    final latestParts = latest
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
+    // 1. Parse base version and build number
+    // Format: "1.0.0+1" -> base: "1.0.0", build: 1
 
-    // Pad shorter list with zeros
-    while (currentParts.length < 3) currentParts.add(0);
-    while (latestParts.length < 3) latestParts.add(0);
+    final currentSemVer = _parseSemVer(current);
+    final latestSemVer = _parseSemVer(latest);
 
+    // 2. Compare base versions (Major.Minor.Patch)
     for (int i = 0; i < 3; i++) {
-      if (latestParts[i] > currentParts[i]) return true;
-      if (latestParts[i] < currentParts[i]) return false;
+      if (latestSemVer.base[i] > currentSemVer.base[i]) return true;
+      if (latestSemVer.base[i] < currentSemVer.base[i]) return false;
     }
-    return false;
+
+    // 3. If base versions equal, compare build numbers
+    return latestSemVer.build > currentSemVer.build;
+  }
+
+  /// Helper to parse version string into structured data
+  _SemVer _parseSemVer(String version) {
+    try {
+      // Remove 'v' prefix if present
+      final cleanVersion = version.startsWith('v')
+          ? version.substring(1)
+          : version;
+
+      final parts = cleanVersion.split('+');
+      final baseStr = parts[0];
+      final buildStr = parts.length > 1 ? parts[1] : '0';
+
+      final baseParts = baseStr
+          .split('.')
+          .map((e) => int.tryParse(e) ?? 0)
+          .toList();
+      while (baseParts.length < 3) baseParts.add(0);
+
+      return _SemVer(base: baseParts, build: int.tryParse(buildStr) ?? 0);
+    } catch (e) {
+      // Fallback for malformed versions
+      return _SemVer(base: [0, 0, 0], build: 0);
+    }
   }
 
   /// Download and install the APK update
@@ -188,6 +209,12 @@ class UpdateService {
       onError?.call('Download failed: ${e.toString()}');
     }
   }
+}
+
+class _SemVer {
+  final List<int> base;
+  final int build;
+  _SemVer({required this.base, required this.build});
 }
 
 /// Result of an update check
