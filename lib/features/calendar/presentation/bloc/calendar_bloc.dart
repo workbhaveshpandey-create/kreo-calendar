@@ -58,13 +58,22 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
       // Get initial data
       final calendars = await _calendarRepository.getCalendars(event.userId);
-
       final now = DateTime.now();
+
+      // Pre-load events to prevent "pop-in"
+      // We get the stream, take the first element (initial data), and await it.
+      final eventStream = _calendarRepository.getEventsForMonthStream(
+        userId: event.userId,
+        year: now.year,
+        month: now.month,
+      );
+
+      final initialEvents = await eventStream.first;
 
       emit(
         CalendarLoaded(
           calendars: calendars,
-          events: [], // Will be populated by stream immediately
+          events: initialEvents,
           selectedDate: now,
           focusedDate: now,
         ),
@@ -73,9 +82,13 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       // Set up real-time sync for calendars
       _setupRealtimeSync(event.userId);
 
-      // Subscribe to events for current month
-      _subscribeToMonthEvents(event.userId, now);
+      // Subscribe to events for continuous updates
+      // We re-subscribe to the stream for future updates
+      _eventsSubscription = eventStream.listen((events) {
+        add(CalendarEventsUpdatedFromStream(events));
+      });
     } catch (e) {
+      print('DEBUG: Error loading calendar: $e');
       emit(CalendarError('Failed to load calendar: ${e.toString()}'));
     }
   }
