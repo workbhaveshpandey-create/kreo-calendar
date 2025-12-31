@@ -191,8 +191,8 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         // Stream will handle the update automatically via Firestore latency compensation
       } catch (e) {
         print('DEBUG: Error creating event: $e');
-        emit(CalendarError('Failed to create event: ${e.toString()}'));
-        // No need to emit currentState as it hasn't changed
+        // Do not emit error state to prevent UI flickers/wipes
+        // emit(CalendarError('Failed to create event: ${e.toString()}'));
       }
     } else {
       print(
@@ -212,7 +212,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         await _calendarRepository.updateEvent(event.event);
         // Stream will handle the update
       } catch (e) {
-        emit(CalendarError('Failed to update event: ${e.toString()}'));
+        print('DEBUG: Error updating event: $e');
       }
     }
   }
@@ -233,7 +233,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
         // Stream will handle the update
       } catch (e) {
-        emit(CalendarError('Failed to delete event: ${e.toString()}'));
+        print('DEBUG: Error deleting event: $e');
       }
     }
   }
@@ -259,7 +259,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         await _calendarRepository.createCalendar(newCalendar);
         // Stream will handle the update
       } catch (e) {
-        emit(CalendarError('Failed to create calendar: ${e.toString()}'));
+        print('DEBUG: Error creating calendar: $e');
       }
     }
   }
@@ -275,7 +275,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         await _calendarRepository.updateCalendar(event.calendar);
         // Stream will handle the update
       } catch (e) {
-        emit(CalendarError('Failed to update calendar: ${e.toString()}'));
+        print('DEBUG: Error updating calendar: $e');
       }
     }
   }
@@ -291,7 +291,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         await _calendarRepository.deleteCalendar(event.calendarId);
         // Stream will handle the update
       } catch (e) {
-        emit(CalendarError('Failed to delete calendar: ${e.toString()}'));
+        print('DEBUG: Error deleting calendar: $e');
       }
     }
   }
