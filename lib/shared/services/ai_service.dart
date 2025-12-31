@@ -107,7 +107,7 @@ class AIService {
     final systemPrompt =
         '''You are a smart calendar assistant. Your ONLY job is to extract event details from natural language and return them as a strict JSON object.
 
-Current Reference Time: ${now.toIso8601String()}
+Current Reference Time: ${now.toIso8601String()} (Year: ${now.year})
 
 Input: "$text"
 
@@ -118,6 +118,13 @@ Instructions:
 4. Default Duration is 1 hour if not specified.
 5. If "for X hours" or "X minutes" is mentioned, calculate End Time accordingly.
 6. OUTPUT MUST BE RAW JSON ONLY. NO MARKDOWN. NO EXPLANATION.
+
+CRITICAL DATE LOGIC:
+7. Check the Current Reference Time closely.
+8. If the user mentions a date (e.g., "January 5th") that has already passed in the current year (${now.year}), you MUST schedule it for the NEXT year (${now.year + 1}).
+   - Example: If Reference is Dec 31, 2025 and input is "Meeting Jan 2nd", Date MUST be 2026-01-02.
+   - Example: If Reference is May 2025 and input is "Meeting in April", Date MUST be 2026-04-xx.
+9. If the user specifies a year explicitly (e.g., "Jan 5 2025"), respect it.
 
 JSON Schema:
 {
@@ -131,7 +138,7 @@ JSON Schema:
 }
 
 Examples:
-- "Meeting tomorrow at 3pm for 2 hours" -> {"title":"Meeting","date":"${_getDate(now.add(const Duration(days: 1)))}","startTime":"15:00","endTime":"17:00","isAllDay":false,"location":null,"description":null}
+- "Meeting tomorrow at 3pm" (Assume Ref: 2025-12-31) -> {"title":"Meeting","date":"2026-01-01","startTime":"15:00","endTime":"16:00","isAllDay":false,"location":null,"description":null}
 - "Aaj shaam 5 baje cricket" -> {"title":"Cricket","date":"${_getDate(now)}","startTime":"17:00","endTime":"18:00","isAllDay":false,"location":null,"description":null}
 ''';
 
