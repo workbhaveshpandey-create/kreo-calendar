@@ -1,13 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../core/constants/app_config.dart';
 
 /// OpenRouter AI Service
 /// Provides AI capabilities for smart calendar features
 class AIService {
-  static const String _baseUrl = 'https://openrouter.ai/api/v1';
-  static const String _model = AppConfig.aiModel;
-
   final String apiKey;
   final http.Client _client;
 
@@ -20,40 +16,8 @@ class AIService {
     String? model,
     double temperature = 0.7,
   }) async {
-    try {
-      print(
-        'DEBUG: Sending request to OpenRouter with model: ${model ?? _model}',
-      );
-      final response = await _client
-          .post(
-            Uri.parse('$_baseUrl/chat/completions'),
-            headers: {
-              'Authorization': 'Bearer $apiKey',
-              'Content-Type': 'application/json',
-              'HTTP-Referer': 'https://kreo-calendar.app',
-              'X-Title': 'Kreo Calendar',
-            },
-            body: jsonEncode({
-              'model': model ?? _model,
-              'messages': messages,
-              'temperature': temperature,
-            }),
-          )
-          .timeout(const Duration(seconds: 10)); // Short timeout for fallback
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['choices'][0]['message']['content'] ?? '';
-      } else {
-        print(
-          'DEBUG: OpenRouter failed with ${response.statusCode}. Trying fallback...',
-        );
-        return await _chatWithPollinations(messages);
-      }
-    } catch (e) {
-      print('DEBUG: OpenRouter exception: $e. Trying fallback...');
-      return await _chatWithPollinations(messages);
-    }
+    // Directly use Pollinations for fastest response (OpenRouter is rate limited)
+    return await _chatWithPollinations(messages);
   }
 
   /// Fallback chat using Pollinations AI
