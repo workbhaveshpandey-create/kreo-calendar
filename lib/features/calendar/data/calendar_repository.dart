@@ -164,10 +164,8 @@ class CalendarRepository {
     required int year,
     required int month,
   }) {
-    final startOfMonth = DateTime(year, month, 1);
-    final endOfMonth = DateTime(year, month + 1, 0, 23, 59, 59);
-
-    // Fetch all user events and filter client-side to avoid composite index
+    // Fetch all user events and let UI handle filtering
+    // This prevents issues with timezones or boundary conditions
     return _firestore
         .collection('events')
         .where('userId', isEqualTo: userId)
@@ -175,15 +173,6 @@ class CalendarRepository {
         .map((snapshot) {
           final events = snapshot.docs
               .map((doc) => EventModel.fromFirestore(doc))
-              .where(
-                (e) =>
-                    e.startTime.isAfter(
-                      startOfMonth.subtract(const Duration(seconds: 1)),
-                    ) &&
-                    e.startTime.isBefore(
-                      endOfMonth.add(const Duration(seconds: 1)),
-                    ),
-              )
               .toList();
           events.sort((a, b) => a.startTime.compareTo(b.startTime));
           return events;
