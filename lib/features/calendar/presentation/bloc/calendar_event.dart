@@ -132,3 +132,13 @@ class CalendarFilterSelected extends CalendarEvent {
 class CalendarRefreshRequested extends CalendarEvent {
   const CalendarRefreshRequested();
 }
+
+/// Events updated from real-time stream
+class CalendarEventsUpdatedFromStream extends CalendarEvent {
+  final List<EventModel> events;
+
+  const CalendarEventsUpdatedFromStream(this.events);
+
+  @override
+  List<Object?> get props => [events];
+}

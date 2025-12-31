@@ -20,42 +20,85 @@ class AIService {
     String? model,
     double temperature = 0.7,
   }) async {
-    print(
-      'DEBUG: Sending request to OpenRouter with model: ${model ?? _model}',
-    );
-    final response = await _client
-        .post(
-          Uri.parse('$_baseUrl/chat/completions'),
-          headers: {
-            'Authorization': 'Bearer $apiKey',
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://kreo-calendar.app',
-            'X-Title': 'Kreo Calendar',
-          },
-          body: jsonEncode({
-            'model': model ?? _model,
-            'messages': messages,
-            'temperature': temperature,
-          }),
-        )
-        .timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            throw AIException(
-              'Request timed out. Please check your internet connection.',
-            );
-          },
+    try {
+      print(
+        'DEBUG: Sending request to OpenRouter with model: ${model ?? _model}',
+      );
+      final response = await _client
+          .post(
+            Uri.parse('$_baseUrl/chat/completions'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+              'HTTP-Referer': 'https://kreo-calendar.app',
+              'X-Title': 'Kreo Calendar',
+            },
+            body: jsonEncode({
+              'model': model ?? _model,
+              'messages': messages,
+              'temperature': temperature,
+            }),
+          )
+          .timeout(const Duration(seconds: 10)); // Short timeout for fallback
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'] ?? '';
+      } else {
+        print(
+          'DEBUG: OpenRouter failed with ${response.statusCode}. Trying fallback...',
         );
-
-    print('DEBUG: OpenRouter ID: ${response.statusCode}');
-    print('DEBUG: OpenRouter Body: ${response.body}');
-
-    if (response.statusCode != 200) {
-      throw AIException('Failed to get AI response: ${response.body}');
+        return await _chatWithPollinations(messages);
+      }
+    } catch (e) {
+      print('DEBUG: OpenRouter exception: $e. Trying fallback...');
+      return await _chatWithPollinations(messages);
     }
+  }
 
-    final data = jsonDecode(response.body);
-    return data['choices'][0]['message']['content'] ?? '';
+  /// Fallback chat using Pollinations AI
+  Future<String> _chatWithPollinations(
+    List<Map<String, String>> messages,
+  ) async {
+    try {
+      // Construct a single prompt from messages for Pollinations
+      String fullPrompt = messages
+          .map((m) => "${m['role']}: ${m['content']}")
+          .join('\n');
+      // Append system instruction if needed, though usually included in messages
+
+      print('DEBUG: Sending request to Pollinations AI...');
+      final response = await _client
+          .post(
+            Uri.parse('https://text.pollinations.ai/'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'messages':
+                  messages, // Pollinations supports OpenAI format now too, or just text
+              'model':
+                  'openai', // Optional, pollinations uses openai-compatible or other models
+              'jsonMode': true, // Hint for JSON
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        // Pollinations text API usually returns the text directly
+        return response.body;
+      } else {
+        // Try simple GET if POST fails
+        final encodedPrompt = Uri.encodeComponent(fullPrompt);
+        final getResponse = await _client.get(
+          Uri.parse('https://text.pollinations.ai/$encodedPrompt'),
+        );
+        if (getResponse.statusCode == 200) {
+          return getResponse.body;
+        }
+      }
+      throw AIException('Both OpenRouter and Pollinations failed.');
+    } catch (e) {
+      throw AIException('AI Service failed: $e');
+    }
   }
 
   /// Parse natural language into a structured event
@@ -95,8 +138,6 @@ Examples:
     try {
       print('DEBUG: parseEventFromText called with: $text');
 
-      // Gemma 3 4B on OpenRouter/Google AI Studio does not support 'system' role
-      // So we merge the system prompt into the user message
       final combinedPrompt = '$systemPrompt\n\nUser Input: "$text"';
 
       final response = await chat(

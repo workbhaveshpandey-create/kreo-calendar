@@ -33,6 +33,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     on<CalendarDeleted>(_onCalendarDeleted);
     on<CalendarFilterSelected>(_onFilterSelected);
     on<CalendarRefreshRequested>(_onRefreshRequested);
+    on<CalendarEventsUpdatedFromStream>(_onEventsUpdatedFromStream);
   }
 
   @override
@@ -58,28 +59,22 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       // Get initial data
       final calendars = await _calendarRepository.getCalendars(event.userId);
 
-      // Get current month events
       final now = DateTime.now();
-      final startOfMonth = DateTime(now.year, now.month, 1);
-      final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-
-      final events = await _calendarRepository.getEventsInRange(
-        userId: event.userId,
-        start: startOfMonth,
-        end: endOfMonth,
-      );
 
       emit(
         CalendarLoaded(
           calendars: calendars,
-          events: events,
+          events: [], // Will be populated by stream immediately
           selectedDate: now,
           focusedDate: now,
         ),
       );
 
-      // Set up real-time sync
+      // Set up real-time sync for calendars
       _setupRealtimeSync(event.userId);
+
+      // Subscribe to events for current month
+      _subscribeToMonthEvents(event.userId, now);
     } catch (e) {
       emit(CalendarError('Failed to load calendar: ${e.toString()}'));
     }
@@ -87,16 +82,6 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
 
   /// Set up real-time synchronization
   void _setupRealtimeSync(String userId) {
-    // Listen to events changes
-    _eventsSubscription = _calendarRepository.getEventsStream(userId).listen((
-      events,
-    ) {
-      final currentState = state;
-      if (currentState is CalendarLoaded) {
-        add(CalendarRefreshRequested());
-      }
-    });
-
     // Listen to calendars changes
     _calendarsSubscription = _calendarRepository
         .getCalendarsStream(userId)
@@ -104,6 +89,31 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
           // Use add to trigger refresh instead of direct emit
           add(const CalendarRefreshRequested());
         });
+  }
+
+  /// Subscribe to events for a specific month
+  void _subscribeToMonthEvents(String userId, DateTime focusedDate) {
+    _eventsSubscription?.cancel();
+    _eventsSubscription = _calendarRepository
+        .getEventsForMonthStream(
+          userId: userId,
+          year: focusedDate.year,
+          month: focusedDate.month,
+        )
+        .listen((events) {
+          add(CalendarEventsUpdatedFromStream(events));
+        });
+  }
+
+  /// Handle stream update
+  void _onEventsUpdatedFromStream(
+    CalendarEventsUpdatedFromStream event,
+    Emitter<CalendarState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is CalendarLoaded) {
+      emit(currentState.copyWith(events: event.events));
+    }
   }
 
   /// Handle date selection
@@ -124,30 +134,11 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
   ) async {
     final currentState = state;
     if (currentState is CalendarLoaded && _currentUserId != null) {
-      // Load events for new month
-      final startOfMonth = DateTime(
-        event.focusedDate.year,
-        event.focusedDate.month,
-        1,
-      );
-      final endOfMonth = DateTime(
-        event.focusedDate.year,
-        event.focusedDate.month + 1,
-        0,
-        23,
-        59,
-        59,
-      );
+      // Update focused date
+      emit(currentState.copyWith(focusedDate: event.focusedDate));
 
-      final events = await _calendarRepository.getEventsInRange(
-        userId: _currentUserId!,
-        start: startOfMonth,
-        end: endOfMonth,
-      );
-
-      emit(
-        currentState.copyWith(focusedDate: event.focusedDate, events: events),
-      );
+      // Update subscription to new month
+      _subscribeToMonthEvents(_currentUserId!, event.focusedDate);
     }
   }
 
@@ -197,15 +188,11 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         }
 
         // Add to current events list
-        final updatedEvents = [...currentState.events, newEvent];
-        print(
-          'DEBUG: Emitting updated state with ${updatedEvents.length} events',
-        );
-        emit(currentState.copyWith(events: updatedEvents));
+        // Stream will handle the update automatically via Firestore latency compensation
       } catch (e) {
         print('DEBUG: Error creating event: $e');
         emit(CalendarError('Failed to create event: ${e.toString()}'));
-        emit(currentState);
+        // No need to emit currentState as it hasn't changed
       }
     } else {
       print(
@@ -223,15 +210,9 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     if (currentState is CalendarLoaded) {
       try {
         await _calendarRepository.updateEvent(event.event);
-
-        // Update in current events list
-        final updatedEvents = currentState.events.map((e) {
-          return e.id == event.event.id ? event.event : e;
-        }).toList();
-        emit(currentState.copyWith(events: updatedEvents));
+        // Stream will handle the update
       } catch (e) {
         emit(CalendarError('Failed to update event: ${e.toString()}'));
-        emit(currentState);
       }
     }
   }
@@ -250,14 +231,9 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
         final notificationService = NotificationService();
         await notificationService.cancelEventReminder(event.eventId);
 
-        // Remove from current events list
-        final updatedEvents = currentState.events
-            .where((e) => e.id != event.eventId)
-            .toList();
-        emit(currentState.copyWith(events: updatedEvents));
+        // Stream will handle the update
       } catch (e) {
         emit(CalendarError('Failed to delete event: ${e.toString()}'));
-        emit(currentState);
       }
     }
   }
@@ -280,14 +256,10 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
           updatedAt: now,
         );
 
-        final created = await _calendarRepository.createCalendar(newCalendar);
-
-        // Add to current calendars list
-        final updatedCalendars = [...currentState.calendars, created];
-        emit(currentState.copyWith(calendars: updatedCalendars));
+        await _calendarRepository.createCalendar(newCalendar);
+        // Stream will handle the update
       } catch (e) {
         emit(CalendarError('Failed to create calendar: ${e.toString()}'));
-        emit(currentState);
       }
     }
   }
@@ -301,15 +273,9 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     if (currentState is CalendarLoaded) {
       try {
         await _calendarRepository.updateCalendar(event.calendar);
-
-        // Update in current calendars list
-        final updatedCalendars = currentState.calendars.map((c) {
-          return c.id == event.calendar.id ? event.calendar : c;
-        }).toList();
-        emit(currentState.copyWith(calendars: updatedCalendars));
+        // Stream will handle the update
       } catch (e) {
         emit(CalendarError('Failed to update calendar: ${e.toString()}'));
-        emit(currentState);
       }
     }
   }
@@ -323,24 +289,9 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     if (currentState is CalendarLoaded) {
       try {
         await _calendarRepository.deleteCalendar(event.calendarId);
-
-        // Remove from current calendars list and related events
-        final updatedCalendars = currentState.calendars
-            .where((c) => c.id != event.calendarId)
-            .toList();
-        final updatedEvents = currentState.events
-            .where((e) => e.calendarId != event.calendarId)
-            .toList();
-
-        emit(
-          currentState.copyWith(
-            calendars: updatedCalendars,
-            events: updatedEvents,
-          ),
-        );
+        // Stream will handle the update
       } catch (e) {
         emit(CalendarError('Failed to delete calendar: ${e.toString()}'));
-        emit(currentState);
       }
     }
   }
@@ -361,33 +312,18 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
     CalendarRefreshRequested event,
     Emitter<CalendarState> emit,
   ) async {
-    final currentState = state;
+    final currentState = state; // Keep this one
     if (currentState is CalendarLoaded && _currentUserId != null) {
+      // Re-subscribe to ensure connection is alive
+      _subscribeToMonthEvents(_currentUserId!, currentState.focusedDate);
+
+      // Also refresh calendars
       try {
-        final startOfMonth = DateTime(
-          currentState.focusedDate.year,
-          currentState.focusedDate.month,
-          1,
+        final calendars = await _calendarRepository.getCalendars(
+          _currentUserId!,
         );
-        final endOfMonth = DateTime(
-          currentState.focusedDate.year,
-          currentState.focusedDate.month + 1,
-          0,
-          23,
-          59,
-          59,
-        );
-
-        final events = await _calendarRepository.getEventsInRange(
-          userId: _currentUserId!,
-          start: startOfMonth,
-          end: endOfMonth,
-        );
-
-        emit(currentState.copyWith(events: events));
-      } catch (e) {
-        // Silently fail on refresh
-      }
+        emit(currentState.copyWith(calendars: calendars));
+      } catch (_) {}
     }
   }
 }
