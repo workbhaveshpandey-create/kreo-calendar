@@ -45,13 +45,13 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
               Text(
                 'KREO',
                 style: AppTextStyles.headlineMedium(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 2),
               ),
               Text(
                 DateFormat('MMM d').format(DateTime.now()).toUpperCase(),
                 style: AppTextStyles.bodyMedium(
-                  color: Colors.grey,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ).copyWith(letterSpacing: 2),
               ),
             ],
@@ -63,7 +63,10 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
-            icon: const Icon(Icons.grid_view, color: Colors.white),
+            icon: Icon(
+              Icons.grid_view,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ],
       ),
@@ -450,22 +453,22 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             children: [
               IconButton(
                 onPressed: () => _changeMonth(-1),
-                icon: const Icon(
+                icon: Icon(
                   Icons.chevron_left_rounded,
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
                 DateFormat('MMMM').format(_focusedMonth).toUpperCase(),
                 style: AppTextStyles.calendarMonth(
-                  color: AppColors.onBackground,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               IconButton(
                 onPressed: () => _changeMonth(1),
-                icon: const Icon(
+                icon: Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -482,7 +485,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                   child: Text(
                     day,
                     style: AppTextStyles.calendarWeekday(
-                      color: AppColors.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -593,20 +596,24 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
   }) {
     if (!isCurrentMonth) return const SizedBox.shrink();
 
-    Color textColor = Colors.grey[700]!;
+    final theme = Theme.of(context);
+    Color textColor;
     Color? bgColor;
     BoxBorder? border;
 
     if (isSelected) {
-      bgColor = Colors.white;
-      textColor = Colors.black;
+      // Selected day: Inverse colors
+      bgColor = theme.colorScheme.onSurface;
+      textColor = theme.colorScheme.surface;
     } else if (isToday) {
-      border = Border.all(color: Colors.white, width: 1);
-      textColor = Colors.white;
+      // Today: Border and primary text color
+      border = Border.all(color: theme.colorScheme.onSurface, width: 1);
+      textColor = theme.colorScheme.onSurface;
     } else if (holiday != null) {
       textColor = AppColors.minimalError;
     } else {
-      textColor = Colors.white54;
+      // Normal day: Muted text color
+      textColor = theme.colorScheme.onSurface.withOpacity(0.6);
     }
 
     return GestureDetector(
@@ -670,10 +677,15 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
       headerText = 'UPCOMING';
     }
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08))),
+        color: isDark ? Colors.black : theme.scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.08)),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -686,7 +698,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                 Text(
                   headerText,
                   style: AppTextStyles.labelMedium(
-                    color: Colors.white38,
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
                   ).copyWith(letterSpacing: 3, fontWeight: FontWeight.w600),
                 ),
                 GestureDetector(
@@ -694,12 +706,16 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white12),
+                      border: Border.all(
+                        color: theme.colorScheme.onSurface.withOpacity(0.12),
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add,
-                      color: Colors.white54,
+                      color: theme.colorScheme.onSurfaceVariant.withOpacity(
+                        0.6,
+                      ),
                       size: 18,
                     ),
                   ),
@@ -814,7 +830,9 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
       child: Text(
         'NO EVENTS',
         style: AppTextStyles.bodyMedium(
-          color: Colors.white24,
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.4),
         ).copyWith(letterSpacing: 2),
       ),
     );
@@ -822,6 +840,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
 
   Widget _buildPremiumEventCard(EventModel event) {
     final isAllDay = event.isAllDay;
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () => _showEventEditor(event: event),
@@ -832,12 +851,14 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white.withOpacity(0.06),
-              Colors.white.withOpacity(0.02),
+              theme.colorScheme.onSurface.withOpacity(0.06),
+              theme.colorScheme.onSurface.withOpacity(0.02),
             ],
           ),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withOpacity(0.08),
+          ),
         ),
         child: Row(
           children: [
@@ -861,7 +882,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                         ? 'ALL'
                         : DateFormat('HH:mm').format(event.startTime),
                     style: AppTextStyles.titleMedium(
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ).copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 2),
@@ -872,7 +893,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                             'MMM d',
                           ).format(event.startTime).toUpperCase(),
                     style: AppTextStyles.labelSmall(
-                      color: Colors.white38,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ).copyWith(letterSpacing: 1),
                   ),
                 ],
@@ -887,7 +908,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                   Text(
                     event.title,
                     style: AppTextStyles.titleSmall(
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ).copyWith(fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -899,14 +920,16 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                         Icon(
                           Icons.location_on_outlined,
                           size: 12,
-                          color: Colors.white38,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             event.location!,
                             style: AppTextStyles.labelSmall(
-                              color: Colors.white38,
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.6,
+                              ),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -919,58 +942,10 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
               ),
             ),
             // Arrow indicator
-            Icon(Icons.chevron_right, color: Colors.white24, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMinimalEventCard(EventModel event) {
-    return GestureDetector(
-      onTap: () => _showEventEditor(event: event),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.white24),
-          color: Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  DateFormat('HH:mm').format(event.startTime),
-                  style: AppTextStyles.bodyMedium(color: Colors.white),
-                ),
-                Text(
-                  DateFormat('MMM d').format(event.startTime).toUpperCase(),
-                  style: AppTextStyles.labelSmall(color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title.toUpperCase(),
-                    style: AppTextStyles.bodyLarge(
-                      color: Colors.white,
-                    ).copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  if (event.description != null &&
-                      event.description!.isNotEmpty)
-                    Text(
-                      event.description!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall(color: Colors.grey),
-                    ),
-                ],
-              ),
+            Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurface.withOpacity(0.24),
+              size: 20,
             ),
           ],
         ),
