@@ -127,36 +127,44 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 10),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate available height for calendar
+            final screenHeight = constraints.maxHeight;
+            final calendarMinHeight =
+                screenHeight * 0.55; // Minimum 55% for calendar
 
-            // Minimal Calendar Grid
-            Expanded(
-              flex: 3,
-              child: BlocBuilder<CalendarBloc, CalendarState>(
-                builder: (context, state) {
-                  return state is CalendarLoaded
-                      ? _buildCalendarGrid(state)
-                      : _buildLoadingState();
-                },
-              ),
-            ),
+            return Column(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 10),
 
-            // Minimal Upcoming Events
-            Expanded(
-              flex: 2,
-              child: BlocBuilder<CalendarBloc, CalendarState>(
-                builder: (context, state) {
-                  if (state is CalendarLoaded) {
-                    return _buildUpcomingEvents(state);
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-          ],
+                // Calendar Grid - Takes priority
+                SizedBox(
+                  height: calendarMinHeight,
+                  child: BlocBuilder<CalendarBloc, CalendarState>(
+                    builder: (context, state) {
+                      return state is CalendarLoaded
+                          ? _buildCalendarGrid(state)
+                          : _buildLoadingState();
+                    },
+                  ),
+                ),
+
+                // Upcoming Events - Flexible remaining space
+                Expanded(
+                  child: BlocBuilder<CalendarBloc, CalendarState>(
+                    builder: (context, state) {
+                      if (state is CalendarLoaded) {
+                        return _buildUpcomingEvents(state);
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
 

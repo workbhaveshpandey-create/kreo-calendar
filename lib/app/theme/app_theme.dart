@@ -182,8 +182,119 @@ class AppTextStyles {
 class AppTheme {
   AppTheme._();
 
-  // Force Dark Mode even for Light Theme to maintain consistent "Future" aesthetic
-  static ThemeData get light => dark;
+  // Proper Light Theme
+  static ThemeData get light => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    primaryColor: Colors.black,
+    scaffoldBackgroundColor: AppColors.lightBackground,
+    colorScheme: const ColorScheme.light(
+      primary: Colors.black,
+      secondary: Colors.black87,
+      surface: Colors.white,
+      surfaceContainerHighest: AppColors.lightSurfaceVariant,
+      error: AppColors.minimalError,
+      onSurface: Colors.black,
+      onSurfaceVariant: AppColors.lightOnSurfaceVariant,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: AppColors.lightBackground,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      titleTextStyle: AppTextStyles.titleLarge(color: Colors.black),
+      iconTheme: const IconThemeData(color: Colors.black),
+    ),
+    cardTheme: const CardThemeData(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      elevation: 0,
+    ),
+    dividerTheme: DividerThemeData(
+      color: Colors.black.withOpacity(0.1),
+      thickness: 1,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.transparent,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(color: Colors.black.withOpacity(0.2)),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(color: Colors.black, width: 1),
+      ),
+      hintStyle: AppTextStyles.bodyMedium(color: Colors.grey),
+    ),
+    textTheme: TextTheme(
+      bodyMedium: AppTextStyles.bodyMedium(color: Colors.black),
+      bodySmall: AppTextStyles.bodySmall(color: Colors.grey),
+      titleMedium: AppTextStyles.titleMedium(color: Colors.black),
+      headlineSmall: AppTextStyles.headlineSmall(color: Colors.black),
+      headlineMedium: AppTextStyles.headlineMedium(color: Colors.black),
+    ),
+    // Time Picker Theme - Light styling
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: Colors.white,
+      hourMinuteColor: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.grey[200]!;
+        }
+        return Colors.grey[100]!;
+      }),
+      hourMinuteTextColor: WidgetStateColor.resolveWith(
+        (states) => Colors.black,
+      ),
+      dialBackgroundColor: Colors.grey[100],
+      dialHandColor: Colors.black,
+      dialTextColor: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
+        return Colors.black;
+      }),
+      entryModeIconColor: Colors.black,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      cancelButtonStyle: TextButton.styleFrom(foregroundColor: Colors.black54),
+      confirmButtonStyle: TextButton.styleFrom(foregroundColor: Colors.black),
+    ),
+    // Date Picker Theme - Light styling
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: Colors.white,
+      headerBackgroundColor: Colors.grey[100],
+      headerForegroundColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
+        return Colors.black;
+      }),
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.black;
+        }
+        return Colors.transparent;
+      }),
+      todayForegroundColor: WidgetStateProperty.all(Colors.black),
+      todayBorder: const BorderSide(color: Colors.black),
+      yearForegroundColor: WidgetStateProperty.all(Colors.black),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      cancelButtonStyle: TextButton.styleFrom(foregroundColor: Colors.black54),
+      confirmButtonStyle: TextButton.styleFrom(foregroundColor: Colors.black),
+    ),
+    // Dialog Theme
+    dialogTheme: DialogThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+  );
 
   static ThemeData get dark => ThemeData(
     useMaterial3: true,
