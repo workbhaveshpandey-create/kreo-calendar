@@ -17,15 +17,7 @@ class AuthRepository {
     GoogleSignIn? googleSignIn,
   }) : _auth = auth ?? FirebaseAuth.instance,
        _firestore = firestore ?? FirebaseFirestore.instance,
-       _googleSignIn =
-           googleSignIn ??
-           GoogleSignIn(
-             scopes: [
-               'email',
-               'https://www.googleapis.com/auth/calendar',
-               'https://www.googleapis.com/auth/calendar.events',
-             ],
-           );
+       _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']);
 
   /// Get current user stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();

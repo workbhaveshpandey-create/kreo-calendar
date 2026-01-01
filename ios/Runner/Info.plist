@@ -46,6 +46,13 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	
+	<!-- Background Modes for Notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	
 	<!-- Speech Recognition Permissions -->
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>We need speech recognition to process your voice commands for creating events.</string>
