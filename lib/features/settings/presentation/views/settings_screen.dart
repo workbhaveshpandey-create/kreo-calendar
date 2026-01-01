@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../app/theme/app_theme.dart';
+import '../../../../app/theme/theme_cubit.dart';
 import '../../../../shared/services/notification_service.dart';
 import '../../../../shared/services/update_service.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -282,6 +283,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 48),
             _buildSectionHeader('PREFERENCES'),
             const SizedBox(height: 24),
+            BlocBuilder<ThemeCubit, ThemeMode>(
+              builder: (context, themeMode) {
+                final isDark = themeMode == ThemeMode.dark;
+                return _buildSettingTile(
+                  icon: isDark
+                      ? Icons.dark_mode_outlined
+                      : Icons.light_mode_outlined,
+                  title: 'THEME MODE',
+                  subtitle: isDark ? 'Dark Mode' : 'Light Mode',
+                  trailing: Switch(
+                    value: isDark,
+                    onChanged: (value) =>
+                        context.read<ThemeCubit>().toggleTheme(value),
+                    activeColor: theme.colorScheme.onSurface,
+                    activeTrackColor: theme.colorScheme.surface,
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.grey[900],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
             _buildSettingTile(
               icon: Icons.notifications_none_rounded,
               title: 'NOTIFICATIONS',
