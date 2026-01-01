@@ -652,8 +652,8 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                   margin: const EdgeInsets.only(top: 2),
                   width: 4,
                   height: 4,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface,
                     shape: BoxShape.circle,
                   ),
                 ),
