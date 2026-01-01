@@ -26,7 +26,7 @@ class AIQuickAddWidget extends StatefulWidget {
 
 class _AIQuickAddWidgetState extends State<AIQuickAddWidget> {
   final TextEditingController _controller = TextEditingController();
-  final AIService _aiService = AIService(apiKey: AppConfig.openRouterApiKey);
+  final AIService _aiService = AIService();
   final Uuid _uuid = const Uuid();
 
   bool _isLoading = false;
@@ -280,7 +280,7 @@ class AIAssistantPanel extends StatefulWidget {
 class _AIAssistantPanelState extends State<AIAssistantPanel> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final AIService _aiService = AIService(apiKey: AppConfig.openRouterApiKey);
+  final AIService _aiService = AIService();
 
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;

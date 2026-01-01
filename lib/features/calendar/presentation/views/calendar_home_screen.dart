@@ -81,7 +81,7 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
 
   // Voice Input State
   final SpeechToText _speechToText = SpeechToText();
-  final _aiService = AIService(apiKey: AppConfig.openRouterApiKey);
+  final _aiService = AIService();
   bool _speechEnabled = false;
   bool _isListening = false;
   bool _isProcessing = false;
@@ -504,7 +504,18 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
         const SizedBox(height: 8),
 
         // Calendar Days Grid
-        Expanded(child: _buildDaysGrid(state)),
+        Expanded(
+          child: GestureDetector(
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity! > 0) {
+                _changeMonth(-1); // Swipe Right -> Prev Month
+              } else if (details.primaryVelocity! < 0) {
+                _changeMonth(1); // Swipe Left -> Next Month
+              }
+            },
+            child: _buildDaysGrid(state),
+          ),
+        ),
       ],
     );
   }

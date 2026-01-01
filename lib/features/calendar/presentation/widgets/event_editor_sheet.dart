@@ -80,8 +80,9 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Colors.black;
-    const textColor = Colors.white;
+    final theme = Theme.of(context);
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final textColor = theme.colorScheme.onSurface;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -99,7 +100,7 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
                     child: Text(
                       'CANCEL',
                       style: GoogleFonts.poppins(
-                        color: Colors.white60,
+                        color: theme.colorScheme.onSurfaceVariant,
                         letterSpacing: 2.0,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -154,7 +155,9 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
                           hintStyle: GoogleFonts.poppins(
                             fontSize: 28,
                             fontWeight: FontWeight.w500,
-                            color: Colors.white24,
+                            color: theme.colorScheme.onSurface.withOpacity(
+                              0.24,
+                            ),
                           ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
@@ -174,7 +177,7 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
                         children: [
                           Icon(
                             Icons.wb_sunny_outlined,
-                            color: Colors.white60,
+                            color: theme.colorScheme.onSurfaceVariant,
                             size: 20,
                           ),
                           const SizedBox(width: 16),
@@ -189,10 +192,11 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
                           Switch.adaptive(
                             value: _isAllDay,
                             onChanged: (val) => setState(() => _isAllDay = val),
-                            activeColor: Colors.white,
-                            activeTrackColor: Colors.white24,
+                            activeColor: theme.colorScheme.onSurface,
+                            activeTrackColor: theme.colorScheme.onSurface
+                                .withOpacity(0.24),
                             inactiveThumbColor: Colors.grey,
-                            inactiveTrackColor: Colors.black,
+                            inactiveTrackColor: theme.colorScheme.surface,
                           ),
                         ],
                       ),
@@ -303,7 +307,9 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
           child: Text(
             label,
             style: GoogleFonts.poppins(
-              color: Colors.white38,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withOpacity(0.6),
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.0,
@@ -316,7 +322,7 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
             child: Text(
               date,
               style: GoogleFonts.poppins(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -329,7 +335,7 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
             child: Text(
               time,
               style: GoogleFonts.poppins(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -348,21 +354,32 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.white60, size: 20),
+        Icon(
+          icon,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 20,
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: TextFormField(
             controller: controller,
             maxLines: maxLines,
-            style: GoogleFonts.poppins(color: Colors.white, fontSize: 16),
+            style: GoogleFonts.poppins(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 16,
+            ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.poppins(color: Colors.white24),
+              hintStyle: GoogleFonts.poppins(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withOpacity(0.24),
+              ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.zero,
               isDense: true,
             ),
-            cursorColor: Colors.white,
+            cursorColor: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -372,7 +389,11 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
   Widget _buildMinimalColorPicker() {
     return Row(
       children: [
-        Icon(Icons.palette_outlined, color: Colors.white60, size: 20),
+        Icon(
+          Icons.palette_outlined,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 20,
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: SizedBox(
@@ -394,7 +415,10 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
                       color: color,
                       shape: BoxShape.circle,
                       border: isSelected
-                          ? Border.all(color: Colors.white, width: 2)
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 2,
+                            )
                           : null,
                       boxShadow: isSelected
                           ? [
@@ -418,19 +442,26 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
   Widget _buildMinimalRecurrence() {
     return Row(
       children: [
-        Icon(Icons.cached_rounded, color: Colors.white60, size: 20),
+        Icon(
+          Icons.cached_rounded,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 20,
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: DropdownButtonHideUnderline(
             child: DropdownButton<RecurrenceType>(
               value: _recurrence,
-              dropdownColor: const Color(0xFF101010),
-              icon: const Icon(
+              dropdownColor: Theme.of(context).cardColor,
+              icon: Icon(
                 Icons.keyboard_arrow_down,
-                color: Colors.white24,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               isExpanded: true,
-              style: GoogleFonts.poppins(color: Colors.white, fontSize: 16),
+              style: GoogleFonts.poppins(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 16,
+              ),
               onChanged: (val) {
                 if (val != null) setState(() => _recurrence = val);
               },
@@ -469,19 +500,6 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
       initialDate: initialDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primary,
-              surface: AppColors.surface,
-              onSurface: AppColors.onSurface,
-            ),
-            dialogBackgroundColor: AppColors.surface,
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
@@ -504,26 +522,6 @@ class _EventEditorSheetState extends State<EventEditorSheet> {
     final picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primary,
-              surface: AppColors.surface,
-              onSurface: AppColors.onSurface,
-              secondary: AppColors.primary,
-            ),
-            timePickerTheme: TimePickerThemeData(
-              backgroundColor: AppColors.surface,
-              hourMinuteTextColor: AppColors.onSurface,
-              dayPeriodTextColor: AppColors.onSurfaceVariant,
-              dialHandColor: AppColors.primary,
-              dialBackgroundColor: AppColors.surfaceVariant,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {

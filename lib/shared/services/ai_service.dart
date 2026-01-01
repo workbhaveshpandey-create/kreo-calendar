@@ -4,11 +4,9 @@ import 'package:http/http.dart' as http;
 /// OpenRouter AI Service
 /// Provides AI capabilities for smart calendar features
 class AIService {
-  final String apiKey;
   final http.Client _client;
 
-  AIService({required this.apiKey, http.Client? client})
-    : _client = client ?? http.Client();
+  AIService({http.Client? client}) : _client = client ?? http.Client();
 
   /// Send a chat message to the AI and get a response
   Future<String> chat({
@@ -16,20 +14,20 @@ class AIService {
     String? model,
     double temperature = 0.7,
   }) async {
-    // Directly use Pollinations for fastest response (OpenRouter is rate limited)
-    return await _chatWithPollinations(messages);
+    // Directly use Pollinations
+    return await _chatWithPollinations(messages, seed: 42);
   }
 
   /// Fallback chat using Pollinations AI
   Future<String> _chatWithPollinations(
-    List<Map<String, String>> messages,
-  ) async {
+    List<Map<String, String>> messages, {
+    int? seed,
+  }) async {
     try {
       // Construct a single prompt from messages for Pollinations
       String fullPrompt = messages
           .map((m) => "${m['role']}: ${m['content']}")
           .join('\n');
-      // Append system instruction if needed, though usually included in messages
 
       print('DEBUG: Sending request to Pollinations AI...');
       final response = await _client
@@ -37,24 +35,23 @@ class AIService {
             Uri.parse('https://text.pollinations.ai/'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
-              'messages':
-                  messages, // Pollinations supports OpenAI format now too, or just text
-              'model':
-                  'openai', // Optional, pollinations uses openai-compatible or other models
-              'jsonMode': true, // Hint for JSON
+              'messages': messages,
+              'model': 'openai',
+              'jsonMode': true,
+              'seed': 42, // Consistent seed for caching/speed
             }),
           )
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        // Pollinations text API usually returns the text directly
         return response.body;
       } else {
-        // Try simple GET if POST fails
+        // Try simple GET
         final encodedPrompt = Uri.encodeComponent(fullPrompt);
-        final getResponse = await _client.get(
-          Uri.parse('https://text.pollinations.ai/$encodedPrompt'),
-        );
+        final getResponse = await _client
+            .get(Uri.parse('https://text.pollinations.ai/$encodedPrompt'))
+            .timeout(const Duration(seconds: 30));
+
         if (getResponse.statusCode == 200) {
           return getResponse.body;
         }

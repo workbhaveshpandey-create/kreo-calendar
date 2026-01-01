@@ -315,7 +315,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     activeColor: theme.colorScheme.onSurface,
                     activeTrackColor: theme.colorScheme.surface,
                     inactiveThumbColor: Colors.grey,
-                    inactiveTrackColor: Colors.grey[900],
+                    inactiveTrackColor:
+                        Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[900]
+                        : Colors.grey[300],
                   ),
                 );
               },
@@ -332,7 +335,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 activeColor: theme.colorScheme.onSurface,
                 activeTrackColor: theme.colorScheme.surface,
                 inactiveThumbColor: Colors.grey,
-                inactiveTrackColor: Colors.grey[900],
+                inactiveTrackColor:
+                    Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[900]
+                    : Colors.grey[300],
               ),
             ),
             const SizedBox(height: 8),
@@ -340,7 +346,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.notifications_active_outlined,
               title: 'TEST NOTIFICATION',
               subtitle: 'Send a test to verify notifications work',
-              trailing: const Icon(Icons.chevron_right, color: Colors.white24),
+              trailing: Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurface.withOpacity(0.24),
+              ),
               onTap: () async {
                 final notificationService = NotificationService();
                 await notificationService.requestPermissions();
@@ -408,7 +417,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(
               'VERSION ${_currentVersion ?? '1.0.0'}',
               style: AppTextStyles.bodySmall(
-                color: Colors.grey,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.5),
               ).copyWith(letterSpacing: 2),
             ),
           ],
@@ -574,13 +585,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     title,
                     style: AppTextStyles.titleSmall(
-                      color: textColor ?? Colors.white,
+                      color:
+                          textColor ?? Theme.of(context).colorScheme.onSurface,
                     ).copyWith(letterSpacing: 1),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: AppTextStyles.bodySmall(color: Colors.grey),
+                    style: AppTextStyles.bodySmall(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

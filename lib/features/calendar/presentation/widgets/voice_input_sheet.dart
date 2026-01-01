@@ -25,7 +25,7 @@ class VoiceInputSheet extends StatefulWidget {
 class _VoiceInputSheetState extends State<VoiceInputSheet>
     with SingleTickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
-  final AIService _aiService = AIService(apiKey: AppConfig.openRouterApiKey);
+  final AIService _aiService = AIService();
   final _uuid = const Uuid();
 
   bool _isListening = false;
