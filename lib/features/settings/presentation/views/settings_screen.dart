@@ -63,11 +63,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showUpdateAvailableDialog(UpdateCheckResult result) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+        ),
         title: Row(
           children: [
             const Icon(
@@ -81,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
                 letterSpacing: 1,
               ),
             ),
@@ -114,7 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     result.releaseNotes!,
                     style: GoogleFonts.outfit(
                       fontSize: 12,
-                      color: Colors.white70,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -162,12 +166,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 12, color: Colors.white54),
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+          ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white24),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.24),
+            ),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
@@ -175,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -222,20 +233,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           title,
           style: GoogleFonts.outfit(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isError ? AppColors.minimalError : Colors.white,
+            color: isError
+                ? AppColors.minimalError
+                : Theme.of(context).colorScheme.onSurface,
             letterSpacing: 1,
           ),
         ),
         content: Text(
           content,
-          style: GoogleFonts.outfit(fontSize: 12, color: Colors.white70),
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         actions: [
           TextButton(
@@ -244,7 +260,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'OK',
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: 1,
               ),
             ),
@@ -357,17 +373,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ? 'Checking...'
                         : 'Current: v${_currentVersion ?? '...'}',
                     trailing: _isCheckingUpdate
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           )
-                        : const Icon(
+                        : Icon(
                             Icons.chevron_right,
-                            color: Colors.white24,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.24),
                           ),
                     onTap: _isCheckingUpdate ? null : _checkForUpdates,
                   ),
@@ -400,10 +418,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildDownloadProgress() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -419,7 +440,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     letterSpacing: 1,
                   ),
                 ),
@@ -437,7 +458,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 12),
           LinearProgressIndicator(
             value: _downloadProgress,
-            backgroundColor: Colors.white12,
+            backgroundColor: theme.colorScheme.onSurface.withOpacity(0.12),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
           ),
         ],
@@ -448,18 +469,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildProfileSection() {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
+        final theme = Theme.of(context);
         if (state is AuthAuthenticated) {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.transparent,
-              border: Border.all(color: Colors.white),
+              border: Border.all(color: theme.colorScheme.onSurface),
             ),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: Colors.grey[900],
+                  backgroundColor: theme.colorScheme.surface,
                   backgroundImage: state.user.photoUrl != null
                       ? NetworkImage(state.user.photoUrl!)
                       : null,
@@ -469,7 +491,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ? state.user.displayName![0].toUpperCase()
                               : state.user.email[0].toUpperCase(),
                           style: AppTextStyles.headlineMedium(
-                            color: Colors.white,
+                            color: theme.colorScheme.onSurface,
                           ),
                         )
                       : null,
@@ -482,13 +504,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Text(
                         (state.user.displayName ?? 'User').toUpperCase(),
                         style: AppTextStyles.titleMedium(
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                         ).copyWith(letterSpacing: 1),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         state.user.email,
-                        style: AppTextStyles.bodySmall(color: Colors.grey),
+                        style: AppTextStyles.bodySmall(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -509,7 +533,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title,
         style: AppTextStyles.labelMedium(
-          color: Colors.grey,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ).copyWith(letterSpacing: 2),
       ),
     );
@@ -530,12 +554,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Colors.white.withOpacity(0.1)),
+            bottom: BorderSide(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+            ),
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: iconColor ?? Colors.white, size: 24),
+            Icon(
+              icon,
+              color: iconColor ?? Theme.of(context).colorScheme.onSurface,
+              size: 24,
+            ),
             const SizedBox(width: 20),
             Expanded(
               child: Column(

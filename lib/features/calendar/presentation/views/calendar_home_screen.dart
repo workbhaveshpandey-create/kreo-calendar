@@ -232,9 +232,11 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
   }
 
   Widget _buildMinimalVoiceHUD() {
+    final theme = Theme.of(context);
+
     return Container(
       height: MediaQuery.of(context).size.height,
-      color: Colors.black,
+      color: theme.scaffoldBackgroundColor,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -245,11 +247,14 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(
+                      color: theme.colorScheme.onSurface,
+                      width: 2,
+                    ),
                   ),
                   child: Icon(
                     _isProcessing ? Icons.hourglass_empty : Icons.graphic_eq,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     size: 30,
                   ),
                 )
@@ -266,14 +271,16 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             Text(
               _isProcessing ? 'PROCESSING' : 'LISTENING',
               style: AppTextStyles.headlineSmall(
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
               ).copyWith(letterSpacing: 4),
             ),
 
             const SizedBox(height: 20),
             TextButton(
               onPressed: _toggleListening,
-              style: TextButton.styleFrom(foregroundColor: Colors.grey),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.onSurfaceVariant,
+              ),
               child: const Text('CANCEL'),
             ),
           ],
